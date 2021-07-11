@@ -10,6 +10,8 @@ class CryptoBlock{
      this.data = data; // Gespeicherte Daten z.B Transationsnummer, Summe
      this.vorherigerHash = vorherigerHash;
      this.hash = this.generiereHash();     
+     // Stellt die Schwierigkeit des zu berechnenden Hash Wertes da
+     this.nonce = 0;
     }
 
     // Generiert den SHA256 verschlüsselten Hash
@@ -20,8 +22,19 @@ class CryptoBlock{
              this.vorherigerHash + 
              this.zeitstempel +
              //Umwandlung der Data von einem String zu einem JSON Objekt
-             JSON.stringify(this.data)).toString();
-    }   
+             JSON.stringify(this.data) + this.nonce).toString();
+    }
+    
+    // Bestätigt den berechneten Hash Wert
+    // und speichert eine Nonce um bei einem
+    // neu Hashen die gleiche schwierigkeit
+    // wieder nutzen zu können 
+    proofOfWork(schwierigkeit){
+        while(this.hash.substring(0, schwierigkeit) !==Array(schwierigkeit + 1).join("0")){
+            this.nonce++;
+            this.hash = this.generiereHash();
+        }        
+    }
 }
 
 // Erstellen der Klasse CryptoBlockchain
@@ -30,7 +43,9 @@ class CryptoBlockchain{
     // Beim erstmaligen aufrufen der Klasse und des damit verbunden Constructors,
     // wird der Startblock generiert
     constructor(){
-        this.blockchain = [this.startBlock()];     
+        this.blockchain = [this.startBlock()];    
+        this.schwierigkeit = 4;
+        this.erhoeheSchwierigkeitStart = 2; 
     }
 
     //Generieren des Startblocks mit vordefinierten Daten
@@ -48,14 +63,49 @@ class CryptoBlockchain{
         // Speichern des vorhergehenden Hash-Wertes des Blocks
         neuerBlock.vorherigerHash = this.bekommeNeuestenBlock().hash;
         // Erstellen des Hash's des neuen Blocks
-        neuerBlock.hash = neuerBlock.generiereHash();
+        neuerBlock.proofOfWork(this.schwierigkeit); 
         // Speichern des neuen Blocks
         this.blockchain.push(neuerBlock);
+        // überprüfen ob schwierigkeit erhöht werden muss
+        this.erhoeheSchwierigkeit();
+        // überprüft ob die Blockchain noch gültig ist
+        this.ueberpruefeBlockChainGueltigkeit();
     }
+
+
+    // Überprüft ob die Blockchain noch gültig ist,
+    // verhindert durch stopen des Systems eine
+    // kompromittierung der Blockchain
+    ueberpruefeBlockChainGueltigkeit() {
+        for (let i = 1; i < this.blockchain.length; i++) {
+          const aktuellerBlock = this.blockchain[i];
+          const vorherigerBlock = this.blockchain[i - 1];
+    
+          if (aktuellerBlock.hash !== aktuellerBlock.generiereHash()) {
+            process.exit(1);
+          }
+          if (aktuellerBlock.vorherigerHash !== vorherigerBlock.hash) return process.exit(1);
+        }
+        return true;
+      }
+
+      // erhöht die Schwierigkeit der Blockchain dynamisch
+      erhoeheSchwierigkeit() {
+          var blockChainGroesse = this.blockchain.length;
+
+          console.log("BlockChainGroesse:" + blockChainGroesse + "Groesse: " + this.erhoeheSchwierigkeitStart);
+          if(blockChainGroesse == this.erhoeheSchwierigkeitStart) {
+              this.erhoeheSchwierigkeitStart++;
+              this.schwierigkeit++;
+          }
+      }
 }
+
 
 console.log("Willkommen bei GigoloCoin ihr Rumänisch-Italienischer Crypto Experte des Vertrauens");
 let gigoloCoin = new CryptoBlockchain();
-gigoloCoin.neuenBlockHinzufuegen(new CryptoBlock(1, "01/06/2020", {sender: "Giorgio Dodaro", recipient: "Luca Hiemer", quantity: 50}));
-gigoloCoin.neuenBlockHinzufuegen(new CryptoBlock(2, "01/07/2020", {sender: "Luca Hiemer", recipient: "Jadranko Jurkovic", quantity: 100}) );
+gigoloCoin.neuenBlockHinzufuegen(new CryptoBlock(1, "01/06/2021", {sender: "Giorgio Dodaro", recipient: "Luca Hiemer", quantity: 50}));
+gigoloCoin.neuenBlockHinzufuegen(new CryptoBlock(2, "02/07/2021", {sender: "Luca Hiemer", recipient: "Jadranko Jurkovic", quantity: 100}) );
+gigoloCoin.neuenBlockHinzufuegen(new CryptoBlock(3, "03/07/2021", {sender: "Georg Piel", recipient: "Luca Hiemer", quantity: 3}) );
 console.log(JSON.stringify(gigoloCoin, null, 4));
+console.log("BlockChain Valid: " + gigoloCoin.ueberpruefeBlockChainGueltigkeit());
