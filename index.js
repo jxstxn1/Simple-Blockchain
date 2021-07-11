@@ -80,7 +80,6 @@ class CryptoBlockchain{
         for (let i = 1; i < this.blockchain.length; i++) {
           const aktuellerBlock = this.blockchain[i];
           const vorherigerBlock = this.blockchain[i - 1];
-    
           if (aktuellerBlock.hash !== aktuellerBlock.generiereHash()) {
             process.exit(1);
           }
@@ -92,8 +91,6 @@ class CryptoBlockchain{
       // erhöht die Schwierigkeit der Blockchain dynamisch
       erhoeheSchwierigkeit() {
           var blockChainGroesse = this.blockchain.length;
-
-          console.log("BlockChainGroesse:" + blockChainGroesse + "Groesse: " + this.erhoeheSchwierigkeitStart);
           if(blockChainGroesse == this.erhoeheSchwierigkeitStart) {
               this.erhoeheSchwierigkeitStart++;
               this.schwierigkeit++;
@@ -104,8 +101,8 @@ class CryptoBlockchain{
 
 console.log("Willkommen bei GigoloCoin ihr Rumänisch-Italienischer Crypto Experte des Vertrauens");
 let gigoloCoin = new CryptoBlockchain();
-gigoloCoin.neuenBlockHinzufuegen(new CryptoBlock(1, "01/06/2021", {sender: "Giorgio Dodaro", recipient: "Luca Hiemer", quantity: 50}));
-gigoloCoin.neuenBlockHinzufuegen(new CryptoBlock(2, "02/07/2021", {sender: "Luca Hiemer", recipient: "Jadranko Jurkovic", quantity: 100}) );
-gigoloCoin.neuenBlockHinzufuegen(new CryptoBlock(3, "03/07/2021", {sender: "Georg Piel", recipient: "Luca Hiemer", quantity: 3}) );
+gigoloCoin.neuenBlockHinzufuegen(new CryptoBlock(1, "01/06/2021", {Sender: "Giorgio Dodaro", Empfaenger: "Luca Hiemer", Menge: 50}));
+gigoloCoin.neuenBlockHinzufuegen(new CryptoBlock(2, "02/07/2021", {Sender: "Luca Hiemer", Empfaenger: "Jadranko Jurkovic", Menge: 100}) );
+gigoloCoin.neuenBlockHinzufuegen(new CryptoBlock(3, "03/07/2021", {Sender: "Georg Piel", Empfaenger: "Luca Hiemer",  Menge: 3}) );
 console.log(JSON.stringify(gigoloCoin, null, 4));
-console.log("BlockChain Valid: " + gigoloCoin.ueberpruefeBlockChainGueltigkeit());
+console.log("BlockChain Gültig: " + gigoloCoin.ueberpruefeBlockChainGueltigkeit());
